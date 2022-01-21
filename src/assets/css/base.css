@@ -1,0 +1,194 @@
+@import "./normalize.css";
+
+:root {
+  --font-size: 13px;
+  /* 主色 */
+  --sle-text-color: #0670FF;
+  /* 文字主色 */
+  --text-color: #333;
+  /* 未选图标导航色 */
+  --nosle-text-color: #8D94A2;
+  --t-letter-space: 1px;
+  --main-color: #fff;
+  --main-back: #F6F7F9;
+  /* --main-back: #F0F7FF; */
+  /* 辅助色：F0F7FF， */
+  --auxiliary-color: #F0F7FF;
+  /* 系统默认字：595959，  */
+  --default-text-color: #595959;
+  /* 提示性文字：999999  */
+  --remind-text-color: #999;
+  --line-color: #f3f3f3;
+  --border-color: #ECECEC;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  user-select: none;
+  /* 禁止用户鼠标在页面上选中文字/图片等 */
+  -webkit-tap-highlight-color: transparent;
+  font-size: var(--font-size);
+  /* font-family: system-ui; */
+  font-family: PingFangSC-Medium, PingFang SC;
+  /* font-weight: 600; */
+  color: var(--default-text-color);
+  min-width: 1024px;
+  /* max-width: 1920px; */
+}
+
+a {
+  /* color: var(--color-text); */
+  text-decoration: none;
+}
+
+
+.clear-fix::after {
+  clear: both;
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+.clear-fix {
+  zoom: 1;
+}
+
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+ul {
+  border: 0;
+  padding: 0;
+  outline: none;
+  list-style: none;
+}
+
+li {
+  list-style: none;
+}
+
+
+/* .fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
+} */
+/* 全局划入划出 */
+.slide-enter-active,
+.slide-leave-active {
+  transition: opacity .2s;
+}
+
+.slide-enter,
+.slide-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+  {
+  opacity: .4;
+  transform: translateX(-20px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .2s;
+}
+
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+  {
+  opacity: 0;
+}
+
+.fades-enter-active,
+.fades-leave-active {
+  transition: all .2s ease;
+}
+
+.fades-enter,
+.fades-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+  {
+  opacity: 0;
+  transform: translateX(-40px);
+
+}
+
+.flexcenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.two-menu {
+  width: 100%;
+  height: calc(100% - 48px);
+  overflow: auto;
+  background: #fff;
+}
+
+
+/* 二级路由容器 */
+.two-menu ::-webkit-scrollbar {
+  width: 16px;
+  background: var(--main-back);
+  height: 14px;
+}
+
+.margin-t {
+  height: 14px;
+  background: var(--main-back);
+}
+
+.basic-c {
+  margin-bottom: 14px !important;
+  box-sizing: border-box;
+  /* align-items: center; */
+}
+
+.input-error,
+.input-radio-error {
+  border: 1px solid #f15b5b !important;
+  box-sizing: content-box;
+}
+
+.input-error::after {
+  content: "\2716";
+  color: #fff;
+  background-color: #f15b5b;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  text-align: center;
+  line-height: 16px;
+  font-size: 10px;
+}
+
+.input-line-error {
+  border-bottom: 1px solid #dd9595 !important;
+}
+
+.input-error,
+.input-radio-error,
+.input-line-error {
+  align-items: center;
+}
