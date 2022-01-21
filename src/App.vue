@@ -2959,7 +2959,6 @@ const mapInt = () => {
     marker.addEventListener("click", markerMethod);
     marker.disableMassClear();
     label.disableMassClear();
-
     map.addOverlay(marker);
   });
   // map.addEventListener("zoomstart", function (evt) {
