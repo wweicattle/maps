@@ -2905,32 +2905,32 @@ const mapInt = () => {
             };
             var infoWindow = new BMap.InfoWindow("门店名称:" + val.khmc, opts); // 创建信息窗口对象
 
-    //         var html = [
-    //           "   <div class='infoBoxContent'>",
-    //           "        <div class='title'><strong>门店信息</strong></div>",
-    //           "   <div class='list'>",
-    //           " <ul>",
-    //           " <div class='left'><img src='house3.jpg' /></div>",
-    //           " <div class='left'><a target='_blank' href='http://map.baidu.com'>中海雅园南北通透四居室</a>",
-    //           "   <p>4室2厅，205.00平米，3层</p>",
-    //           "     </div>",
-    //           "                    <div class='rmb'>760万</div>",
-    //           "      </li>",
-    //           "   </ul>",
-    //           "  </div>",
-    //           "   </div>",
-    //         ];
-    //         var infoBox = new BMapLib.InfoBox(map, html.join(""), {
-    //           boxStyle: {
-    //             background: "rgba(255,255,255,.9)"
-    //         ,width: "270px"
-		// ,height: "300px"
-    //           },
-    //           closeIconMargin: "1px 1px 0 0",
-    //           enableAutoPan: true,
-    //           align: INFOBOX_AT_TOP,
-    //          offset:new BMap.Size(-5,40)
-    //         });
+            //         var html = [
+            //           "   <div class='infoBoxContent'>",
+            //           "        <div class='title'><strong>门店信息</strong></div>",
+            //           "   <div class='list'>",
+            //           " <ul>",
+            //           " <div class='left'><img src='house3.jpg' /></div>",
+            //           " <div class='left'><a target='_blank' href='http://map.baidu.com'>中海雅园南北通透四居室</a>",
+            //           "   <p>4室2厅，205.00平米，3层</p>",
+            //           "     </div>",
+            //           "                    <div class='rmb'>760万</div>",
+            //           "      </li>",
+            //           "   </ul>",
+            //           "  </div>",
+            //           "   </div>",
+            //         ];
+            //         var infoBox = new BMapLib.InfoBox(map, html.join(""), {
+            //           boxStyle: {
+            //             background: "rgba(255,255,255,.9)"
+            //         ,width: "270px"
+            // ,height: "300px"
+            //           },
+            //           closeIconMargin: "1px 1px 0 0",
+            //           enableAutoPan: true,
+            //           align: INFOBOX_AT_TOP,
+            //          offset:new BMap.Size(-5,40)
+            //         });
 
             markets.addEventListener("click", function (e) {
               map.openInfoWindow(infoWindow, points); //开启信息窗口
@@ -2964,18 +2964,29 @@ const mapInt = () => {
   });
   // map.addEventListener("zoomstart", function (evt) {
   //   let a = map.getZoom();
+  //   console.log("start");
+  //   console.log(a);
   // });
-  window.onwheel = function () {
+  map.addEventListener("zoomend", function (evt) {
     let a = map.getZoom();
+    // console.log("end");
+
     console.log(a);
-    // var allOverlay = map.getOverlays();
-    // 7的话删除所有~
-    if (a <= 6) {
+    if (a < 6) {
       map.clearOverlays();
-      // window.sa();
-      // copyData();
     }
-  };
+  });
+  // window.onwheel = function () {
+  //   let a = map.getZoom();
+  //   // console.log(a);
+  //   // 7的话删除所有~
+  //   if (a <= 6) {
+  //     map.clearOverlays();
+  //   }
+  // };
+  // map.onstatuschanged = function (e) {
+  //   console.log(e.zoom);
+  // };
   maps = () => {
     return map;
   };
