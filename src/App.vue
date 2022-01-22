@@ -1,10 +1,7 @@
 <script setup>
-// setTimeout(val=>{
-//   console.log(ImagePreview);
-//   // ImagePreview(['https://img.yzcdn.cn/vant/apple-1.jpg']);
-// },5000)
-import getHomeDatas from "./network/home.js";
-import { onMounted, ref, reactive } from "vue";
+import { getShopDatas, getPicture, getHomeDatas } from "./network/home.js";
+
+import { onMounted, ref, reactive, nextTick } from "vue";
 import mapImg from "@/assets/map1.png";
 import RightContent from "@/components/RightContent.vue";
 let markerClusterer = ref(null);
@@ -14,10 +11,178 @@ const rightRef = ref(null);
 let changePro = ref("");
 // console.log(rightDatas);
 let maps;
+var infoBox;
+var dom;
+let imgFa;
+let requestShopDatas = (id) => {
+  // 请求门店详情信息 包括图片 版本等
+  return getShopDatas(id).then((da) => {
+    return da;
+  });
+};
+let pictures = (id) => {
+  // 请求门店详情信息 包括图片 版本等
+  return getPicture(id, "专卖店相片[门头]").then((da) => {
+    return da;
+  });
+};
+
+// 点击出现小窗口函数
+let showShopPage = async (points, val) => {
+  let totalData = await Promise.all([
+    requestShopDatas(val.id),
+    pictures(val.id),
+  ]);
+  if (infoBox) infoBox.close();
+  if (dom) dom.onclick = null;
+  if (imgFa) imgFa.onclick = null;
+  // 请求新的数据
+  // requestShopDatas(7749).then((da) => {
+  // if (da.data.errcode == 0) {
+  // let data=totalData[0].data.data;
+  let hbbbselects = [
+    { mc: "第四代", dm: "0" },
+    { mc: "第五代", dm: "1" },
+    { mc: "第五代修订版", dm: "2" },
+    { mc: "第六代", dm: "3" },
+    { mc: "第七代", dm: "4" },
+  ];
+  let qdfbselects = [
+    { mc: "SHOPPING MALL", dm: "5" },
+    { mc: "社区店", dm: "6" },
+    { mc: "主流商圈店", dm: "1" },
+    { mc: "商场店中店", dm: "2" },
+    { mc: "商场边厅", dm: "3" },
+    { mc: "商场店中岛", dm: "4" },
+    { mc: "奥莱", dm: "7" },
+  ];
+  let {
+    zmdphone = 0,
+    hgbb,
+    jyfs,
+    ysckd,
+    ywyf,
+    yjzmj,
+    ynzje,
+    yjmpro = "",
+    yjmcity = "",
+    yjmarea = "",
+    jmtown="",
+    jmstreet = "",
+    jmno = "",
+    jmmarket = "",
+  } = totalData[0].data.data;
+  let hgbbs = hbbbselects.find((val) => val.dm == hgbb)?.mc || "无";
+  let jyfss = qdfbselects.find((val) => val.dm == jyfs)?.mc || "无";
+
+  // 货柜版本。渠道分布，
+  let map = maps();
+  let imgs =
+    totalData[1].data.data.length == 0
+      ? [{ fileName: "./src/assets/img/noimg.png" }]
+      : totalData[1].data.data;
+  let imgS = imgs.reduce((acc, val) => {
+    let imgstr = `<div class="swiper-slide"><img src=${val.fileName} alt=""></div>`;
+    return acc + imgstr;
+  }, "");
+  let mdmc = val.mdmc;
+  let sskhmc = val.sskhmc;
+  let address =
+    yjmpro + yjmcity + yjmarea + jmtown + jmstreet + jmno + jmmarket;
+  let number = zmdphone;
+  // let qufs = "主品牌";
+  let area = yjzmj;
+  let nzj = ynzje;
+  let kd = ysckd;
+  let nwyf = ywyf;
+  let str = `  <div class="shop-contains">
+        <div class="img-items">
+            <div class="imgs">
+                <div class="close-icon" @click="clickclose">X</div>
+                <div class="swiper">
+                    <div class="swiper-wrapper">
+                        ${imgS}
+                    </div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+
+                </div>
+
+                <div class="icons">
+                    ${yjmcity?yjmcity.substr(0, 2):yjmarea?yjmarea.substr(0, 2):jmtown?jmtown.substr(0, 2):jmstreet?jmstreet.substr(0, 2):"无"}</div>
+            </div>
+        </div>
+        <div class="des-content">
+            <div class="tit">${mdmc}</div>
+            <div class="com-name">贸易公司：${sskhmc}</div>
+            <div class="address">
+                <img src="./src/assets/img/address.png" alt="" /><span>${address}</span></div>
+            <div class="pho-num">
+                <img src="./src/assets/img/number.png" alt="" /><span>${number}</span></div>
+            <div class="line"></div>
+            <div class="datas">
+                <div class="t-name">
+                    <div class="icons"></div>
+                    <div class="tit">店铺资料</div>
+                </div>
+                <div class="des-items">
+                    货柜版本:${hgbbs}; 渠道分布:${jyfss}; 面积:${area}平; 
+                    年租金:${nzj};商场扣点:${kd}%;物业费:${nwyf}元;
+                </div>
+
+            </div>
+
+        </div>
+    </div>`;
+  infoBox = new BMapLib.InfoBox(map, str, {
+    boxStyle: {
+      background: "rgba(255,255,255,.9)",
+      width: "300px",
+      height: "400px",
+    },
+    closeIconMargin: "1px 1px 0 0",
+    enableAutoPan: true,
+    align: INFOBOX_AT_TOP,
+    offset: new BMap.Size(-25, 30),
+  });
+
+  infoBox.open(points);
+  dom = document.querySelector(".close-icon");
+  dom.onclick = function () {
+    infoBox.close();
+  };
+  imgFa = document.querySelector(".swiper-wrapper");
+  imgFa.ondblclick = function (e) {
+    window.open(e.target.src);
+  };
+  // 轮播图
+  var mySwiper = new Swiper(".swiper", {
+    // direction: 'vertical', // 垂直切换选项
+    // loop: true, // 循环模式选项
+
+    // 如果需要分页器
+    // pagination: {
+    //     el: '.swiper-pagination',
+    // },
+
+    // 如果需要前进后退按钮
+    navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+    },
+  });
+};
+
 const expandContent = (val) => {
+  // 点击右边数据门店进入
   if (val && Object.keys(val).length > 0) {
+    // 清除已有得窗口
+    // if (infoBox) infoBox.close();
+    // if (dom) dom.onclick = null;
     let map = maps();
     var point = new BMap.Point(val.lng, val.lat);
+    showShopPage(point, val);
+    // 门店标注
     var marker = new BMap.Marker(point); // 创建标注
     map.addOverlay(marker);
     map.centerAndZoom(point, 15);
@@ -25,6 +190,7 @@ const expandContent = (val) => {
   }
   let map = maps();
   var point = new BMap.Point(116.404, 39.915);
+
   map.centerAndZoom(point, 5);
   map.clearOverlays();
 };
@@ -2770,6 +2936,18 @@ let data;
 //     jmarea: "莱山区",
 //   },
 // ];
+// 腾讯坐标转百度
+function qqMapToBMap(lng, lat) {
+  if (lng == null || lng == "" || lat == null || lat == "") return [lng, lat];
+  var x_pi = 3.14159265358979324;
+  var x = parseFloat(lng);
+  var y = parseFloat(lat);
+  var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * x_pi);
+  var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * x_pi);
+  var lng = (z * Math.cos(theta) + 0.0065).toFixed(5);
+  var lat = (z * Math.sin(theta) + 0.006).toFixed(5);
+  return [lng, lat];
+}
 const mapInt = () => {
   let copyData;
   var polygon;
@@ -2791,25 +2969,11 @@ const mapInt = () => {
   //   // aa.push(e.point.lng + "," + e.point.lat);
   // });
   // [
-  //   "96.13017887752788,35.833468131842004",
-  //   "102.82679492887074,30.38705449265531",
-  // ];
-  function qqMapToBMap(lng, lat) {
-    if (lng == null || lng == "" || lat == null || lat == "") return [lng, lat];
-    var x_pi = 3.14159265358979324;
-    var x = parseFloat(lng);
-    var y = parseFloat(lat);
-    var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * x_pi);
-    var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * x_pi);
-    var lng = (z * Math.cos(theta) + 0.0065).toFixed(5);
-    var lat = (z * Math.sin(theta) + 0.006).toFixed(5);
-    return [lng, lat];
-  }
+
   arrs.forEach((val) => {
     let yi = val.coords[0];
     let er = val.coords[1];
     var points = new BMap.Point(yi, er);
-    console.log();
     var myIcon = new BMap.Icon(mapImg, new BMap.Size(32, 32), {
       // 指定定位位置。
       // 当标注显示在地图上时，其所指向的地理位置距离图标左上
@@ -2829,7 +2993,6 @@ const mapInt = () => {
         nowProObj = proobj[key];
       }
     }
-    // console.log(nowProObj);
     // 创建标注对象并添加到地图
     var marker = new BMap.Marker(points, {
       icon: myIcon,
@@ -2887,68 +3050,19 @@ const mapInt = () => {
             });
           });
           // 该省份门店的门数
-          let arrss = [];
-          // setTimeout((valss) => {
           nowProObj.forEach((val) => {
             let baiduDotted = qqMapToBMap(val.lng, val.lat);
             let points = new BMap.Point(baiduDotted[0], baiduDotted[1]);
-            let markets = new BMap.Marker(points);
-            map.addOverlay(markets);
-            arrss.push(markets);
-
-            var opts = {
-              width: 200, // 信息窗口宽度
-              // height: 100, // 信息窗口高度
-              title: "利郎门店", // 信息窗口标题
-              // message: "这里是故宫",
-              color: "#008c8c",
-            };
-            var infoWindow = new BMap.InfoWindow("门店名称:" + val.khmc, opts); // 创建信息窗口对象
-
-    //         var html = [
-    //           "   <div class='infoBoxContent'>",
-    //           "        <div class='title'><strong>门店信息</strong></div>",
-    //           "   <div class='list'>",
-    //           " <ul>",
-    //           " <div class='left'><img src='house3.jpg' /></div>",
-    //           " <div class='left'><a target='_blank' href='http://map.baidu.com'>中海雅园南北通透四居室</a>",
-    //           "   <p>4室2厅，205.00平米，3层</p>",
-    //           "     </div>",
-    //           "                    <div class='rmb'>760万</div>",
-    //           "      </li>",
-    //           "   </ul>",
-    //           "  </div>",
-    //           "   </div>",
-    //         ];
-    //         var infoBox = new BMapLib.InfoBox(map, html.join(""), {
-    //           boxStyle: {
-    //             background: "rgba(255,255,255,.9)"
-    //         ,width: "270px"
-		// ,height: "300px"
-    //           },
-    //           closeIconMargin: "1px 1px 0 0",
-    //           enableAutoPan: true,
-    //           align: INFOBOX_AT_TOP,
-    //          offset:new BMap.Size(-5,40)
-    //         });
-
-            markets.addEventListener("click", function (e) {
-              map.openInfoWindow(infoWindow, points); //开启信息窗口
-              // infoBox.open(points);
+            let dootMarkers = new BMap.Marker(points);
+            map.addOverlay(dootMarkers);
+            // arrss.push(dootMarkers);
+            dootMarkers.addEventListener("click", function (e) {
+              // 出现小窗口
+              console.log(points,val);
+              showShopPage(points, val);
               map.centerAndZoom(points, 15);
             });
           });
-
-          // var markerClusterer = new BMapLib.MarkerClusterer(map, {
-          //   markers: arrss,
-          // });
-          // window.markersTotal=[];
-          // markersTotal.push(markerClusterer)
-          // window.sa=()=>{
-          //    markerClusterer.clearMarkers()
-          // }
-
-          // }, 100);
         }
       );
 
@@ -2956,15 +3070,23 @@ const mapInt = () => {
     }
     // 把每个省份的标注的属性方法保存起来 。后面点击列表模仿点击
     val.markerMethod = markerMethod;
-    marker.addEventListener("click", markerMethod);
+    let num = 0;
+    if (num == 0) {
+      console.log(21);
+      marker.addEventListener(
+        "click",
+        (e) => {
+          markerMethod();
+          // e.stopPropagation();
+          return false;
+        },
+        false
+      );
+    }
     marker.disableMassClear();
     label.disableMassClear();
-
     map.addOverlay(marker);
   });
-  // map.addEventListener("zoomstart", function (evt) {
-  //   let a = map.getZoom();
-  // });
   window.onwheel = function () {
     let a = map.getZoom();
     console.log(a);
@@ -3017,6 +3139,7 @@ getHomeDatas().then((da) => {
           sskhmc: val.sskhmc,
           lng: val.lng,
           lat: val.lat,
+          id: val.id,
         });
       } else {
         rightDatas[isHave].cityData.push({
@@ -3027,6 +3150,7 @@ getHomeDatas().then((da) => {
               sskhmc: val.sskhmc,
               lng: val.lng,
               lat: val.lat,
+              id: val.id,
             },
           ],
         });
@@ -3043,27 +3167,30 @@ getHomeDatas().then((da) => {
                 sskhmc: val.sskhmc,
                 lng: val.lng,
                 lat: val.lat,
+                id: val.id,
               },
             ],
           },
         ],
       });
     }
-    let { lng, lat, khmc, khflmc } = val;
+    let { lng, lat, mdmc, sskhmc,id } = val;
     if (proobj[val.jmpro]) {
       proobj[val.jmpro].push({
         lng,
         lat,
-        khmc,
-        khflmc,
+        mdmc,
+        sskhmc,
+        id
       });
     } else {
       proobj[val.jmpro] = [
         {
           lng,
           lat,
-          khmc,
-          khflmc,
+          mdmc,
+          sskhmc,
+          id
         },
       ];
     }
@@ -3076,7 +3203,7 @@ getHomeDatas().then((da) => {
 const cityClickExpand = (val) => {
   expandContent(val);
 };
-onMounted((val) => {
+onMounted(async (val) => {
   // mapInt();
 });
 </script>
@@ -3098,6 +3225,164 @@ onMounted((val) => {
 </template>
 
 <style lang="less">
+.swiper {
+  --swiper-theme-color: #ff6600; /* 设置Swiper风格 */
+  --swiper-navigation-color: #000; /* 单独设置按钮颜色 */
+  --swiper-navigation-size: 18px; /* 设置按钮大小 */
+}
+.swiper {
+  width: 300px;
+  height: 160px;
+}
+.swiper-slide img {
+  width: 100%;
+}
+.infoBox {
+  & > img {
+    display: none;
+  }
+}
+.shop-contains {
+  width: 300px;
+  height: 400px;
+  // margin-left: 120px;
+  // border: 1px solid red;
+  padding: 0;
+  background: #ffffff;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  .img-items {
+    height: 160px;
+    width: 300px;
+    // overflow-x: scroll;
+    // overflow: hidden;
+    // overflow-y: hidden;
+    .imgs {
+      height: 160px;
+      position: relative;
+      // display: flex;
+      // flex-wrap: nowrap;
+      .close-icon {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 24px;
+        color: #cfcece;
+        background: #333333;
+        opacity: 0.5;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        z-index: 1000;
+        &:hover {
+          opacity: 0.8;
+          cursor: pointer;
+        }
+      }
+
+      // display: flex;
+      img {
+        // width: 100%;
+        // height: 100%;
+        // float: left;
+        //      width: 300px;
+        // height: 400px;
+        // float: left;
+      }
+      .icons {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #0670ff;
+        text-align: center;
+        line-height: 60px;
+        overflow: hidden;
+        color: #fff;
+        font-size: 18px;
+        z-index: 1000;
+
+        img {
+          width: 100%;
+        }
+        position: absolute;
+        right: 20px;
+        bottom: -20px;
+      }
+    }
+  }
+  .des-content {
+    color: #888888;
+    line-height: 13px;
+    // padding: 0 14px;
+    & > div {
+      padding: 0 14px;
+    }
+    .tit {
+      font-weight: 600;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      color: #333333;
+      font-size: 17px;
+      padding-right: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .com-name {
+      font-size: 14px;
+      // padding: 0px 0 10px 0;
+      padding-bottom: 10px;
+      color: #888888;
+    }
+    .address,
+    .pho-num {
+      padding-bottom: 6px;
+      color: #545454;
+      font-size: 13px;
+      img {
+        height: 14px;
+        margin-right: 2px;
+      }
+      & > span {
+        vertical-align: 1px;
+      }
+    }
+    .line {
+      background: #f0f0f0;
+      height: 6px;
+    }
+    .datas {
+      // height: 100px;
+      // border: 1px solid red;
+      .t-name {
+        display: flex;
+        margin-top: 14px;
+        margin-bottom: 4px;
+        align-items: center;
+        height: 20px;
+        .icons {
+          width: 8px;
+          background: #0670ff;
+          // padding: 4px 0;
+          margin-right: 2px;
+          height: 100%;
+        }
+        .tit {
+          // margin: 8px 0;
+        }
+      }
+      .des-items {
+        font-size: 14px;
+        color: #888888;
+        letter-spacing: 2px;
+        line-height: 19px;
+      }
+    }
+  }
+}
 html,
 body {
   width: 100%;

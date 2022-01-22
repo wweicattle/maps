@@ -358,7 +358,7 @@ const desPro = (val, e) => {
   // 点击跳转省份的数据
   showRight.value = false;
   rihgtData.value = val;
-  cityNums.value = val.cityData.reduce((acc, val, index) => {
+  cityNums.value = val?.cityData.reduce((acc, val, index) => {
     return acc + val.countryDatas.length;
   }, 0);
   // 地图进行跳转
@@ -395,7 +395,7 @@ const changeRight = (newVal) => {
   rihgtData.value = findData;
 };
 const cityClickBtn = (val) => {
-  emit("cityClickExpand", { lng: val.lng, lat: val.lat });
+  emit("cityClickExpand", { lng: val.lng, lat: val.lat,mdmc:val.mdmc,sskhmc:val.sskhmc,id:val.id });
 };
 const findShops = () => {
       watchFn(inputVal.value);
@@ -414,7 +414,6 @@ const watchFn = (newVal) => {
   let homeData = props.homeData;
   // console.log(homeData);
   newInputArrs.value = JSON.parse(JSON.stringify(toRaw(homeData)));
-
   newInputArrs.value.forEach((val) => {
     val.cityData.map((cityVal) => {
       cityVal.countryDatas.map((counryVal, index) => {

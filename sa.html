@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width ,initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        let imgs = ["http://oa.lilang.com:8100/files/201309/6D60509C79CF45DBB3578FE8E2E65575.jpg",
+            "http://oa.lilang.com:8100/files/201309/6D60509C79CF45DBB3578FE8E2E65575.jpg"
+        ];
+        let imgS = imgs.reduce((acc, val) => {
+            let imgstr = `<div class="swiper-slide"><img src=${val} alt=""></div>`
+            return acc + imgstr;
+        }, "")
+
+        let imgstr = `   <img src=${imgs[0]} alt="">`
+        let mdmc = "晋江万达步行街店";
+        let sskhmc = "福建晋江第一公司"
+        let address = "福建省泉州市晋江世纪大道"
+        let number = 8889191;
+        let hgbb = "第五版";
+        let qufs = "主品牌";
+        let area = "36m2"
+        let nzj = 36000;
+        let kd = "0.5%"
+        let nwyf = "2w"
+        let str = `  <div class="shop-contains">
+        <div class="img-items">
+            <div class="imgs">
+                <div class="close-icon" @click="clickclose">X</div>
+                <div class="swiper">
+                    <div class="swiper-wrapper">
+                        ${imgS}
+                    </div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+
+                </div>
+
+                <div class="icons">
+                    泉州</div>
+            </div>
+        </div>
+        <div class="des-content">
+            <div class="tit">${mdmc}</div>
+            <div class="com-name">贸易公司：${sskhmc}</div>
+            <div class="address">
+                <img src="./src/assets/img/address.png" alt="" /><span>福建省泉州市晋江世纪大道</span></div>
+            <div class="pho-num">
+                <img src="./src/assets/img/number.png" alt="" /><span>${number}</span></div>
+            <div class="line"></div>
+            <div class="datas">
+                <div class="t-name">
+                    <div class="icons"></div>
+                    <div class="tit">店铺资料</div>
+                </div>
+                <div class="des-items">
+                    货柜版本:${hgbb}; 渠道分布:${qufs}; 面积:${area}平; 
+                    年租金:${nzj};商场扣点:${kd};物业费:${nwyf}元;
+                </div>
+
+            </div>
+
+        </div>
+    </div>`
+
+
+
+        console.log(str);
+    </script>
+    <div class="shop-contains">
+        <div class="img-items">
+            <div class="imgs">
+                <div class="close-icon" @click="clickclose">X</div>
+                <div class="swiper">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide"><img src="./src//assets/img/map.png" alt=""></div>
+                        <div class="swiper-slide">2</div>
+                        <div class="swiper-slide">3</div>
+                    </div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+
+                </div>
+
+                <div class="icons">
+                    泉州</div>
+            </div>
+        </div>
+        <div class="des-content">
+            <div class="tit">晋江万达步行街店</div>
+            <div class="com-name">贸易公司：福建晋江第一分公司</div>
+            <div class="address">
+                <img src="./src/assets/img/address.png" alt="" /><span>福建省泉州市晋江世纪大道</span></div>
+            <div class="pho-num">
+                <img src="./src/assets/img/number.png" alt="" /><span>2123232323</span></div>
+            <div class="line"></div>
+            <div class="datas">
+                <div class="t-name">
+                    <div class="icons"></div>
+                    <div class="tit">店铺资料</div>
+                </div>
+                <div class="des-items">
+                    货柜版本:第5版; 渠道分布:主流圈店; 面积:30m; 货柜版本:第5版;"
+                    渠道分布:主流圈店; 面积:30m货柜版本:第5版; 渠道分布:主流圈店; 面积:30m"
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <a href="" target="_blank" download="http://oa.lilang.com:8100/files/201909/3C882673E5C74995BC9B14B4E3AD7223.jpg">sas</a>
+    <script>
+        let g = document.querySelector(".swiper-wrapper");
+        g.onclick = function (e) {
+            const link = document.createElement("a");
+    console.log(e.target.src);
+        link.download = e.target.src;
+        link.target = "_blank";
+        console.log(document.body);
+        document.body.appendChild(link);
+        link.click();
+        // document.body.removeChild(link);
+        }
+    </script>
+</body>
+
+</html>
