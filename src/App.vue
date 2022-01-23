@@ -4,7 +4,8 @@ import { onMounted, ref, reactive, nextTick } from "vue";
 import mapImg from "@/assets/map1.png";
 import RightContent from "@/components/RightContent.vue";
 import { debounce } from "@/utils/debounce.js";
-
+import sa from "./sd";
+console.log(sa);
 let markerClusterer = ref(null);
 let infoObj = reactive({ data: [] });
 let homeData = ref(null);
@@ -2973,22 +2974,54 @@ let data;
 //   },
 // ];
 // 腾讯坐标转百度
-function qqMapToBMap(lng, lat) {
-  if (lng == null || lng == "" || lat == null || lat == "") return [lng, lat];
-  var x_pi = 3.14159265358979324;
-  var x = parseFloat(lng);
-  var y = parseFloat(lat);
-  var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * x_pi);
-  var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * x_pi);
-  var lng = (z * Math.cos(theta) + 0.0065).toFixed(5);
-  var lat = (z * Math.sin(theta) + 0.006).toFixed(5);
-  return [lng, lat];
+let translateCallback = function (data) {
+  console.log(data);
+};
+
+async function qqMapToBMap(lng, lat, val) {
+  var convertor = new BMap.Convertor();
+  var ggPoint = new BMap.Point(lng, lat);
+  //坐标转换完之后的回调函数
+
+  var pointArr = [];
+  pointArr.push(ggPoint);
+  convertor.translate(pointArr, 3, 5, function (data) {
+    // console.log(data);
+    val(data);
+  });
 }
+
 const mapInt = () => {
   let copyData;
   var polygon;
   // 百度地图API功能
   var map = new BMap.Map("allmap");
+
+  // let x = 118.706589;
+  // let y = 25.377027;
+  // // var x = 116.32715863448607;
+  // // var y = 39.990912172420714;
+  // var ggPoint = new BMap.Point(x, y);
+  // //坐标转换完之后的回调函数
+  // let translateCallback = function (data) {
+  //   console.log(data);
+  // };
+
+  // // // setTimeout(function () {
+  //   var convertor = new BMap.Convertor();
+  //   var pointArr = [];
+  //   pointArr.push(ggPoint);
+  //   convertor.translate(pointArr, 3, 5, translateCallback);
+  // // }, 1000);
+
+  let points = new BMap.Point(116.404, 39.915);
+  // var convertor = new BMap.Convertor();
+  var pointArr = [];
+  pointArr.push(points);
+  // convertor.translate(pointArr, 3, 5, (da) => {
+  //   console.log(da);
+  // });
+
   var point = new BMap.Point(116.404, 39.915);
   map.centerAndZoom(point, 5);
   map.enableScrollWheelZoom(true);
@@ -3087,8 +3120,12 @@ const mapInt = () => {
           });
           // 该省份门店的门数
           nowProObj.forEach((val) => {
-            let baiduDotted = qqMapToBMap(val.lng, val.lat);
-            let points = new BMap.Point(baiduDotted[0], baiduDotted[1]);
+            // let baiduDotted = await new Promise((res) => {
+            //   qqMapToBMap(val.lng, val.lat, res);
+            // });
+            // console.log(val);
+            // console.log(baiduDotted);
+            let points = new BMap.Point(val.lng, val.lat);
             let dootMarkers = new BMap.Marker(points);
             map.addOverlay(dootMarkers);
             // arrss.push(dootMarkers);
@@ -3120,6 +3157,10 @@ const mapInt = () => {
   //   console.log(a);
   //   // var allOverlay = map.getOverlays();
   //   // 7的话删除所有~
+  // let s=434;
+  // if(true){
+  //   console.log(s);
+  // }
   //   if (a <= 6) {
   //     map.clearOverlays();
   //     // window.sa();
@@ -3138,26 +3179,41 @@ const mapInt = () => {
     return map;
   };
 };
-getHomeDatas().then((da) => {
+// let changedotts = [];
+let datas = window.localStorage.getItem("mapDatas");
+// console.log(JSON.parse(datas));
+// let gg=JSON.parse(datas);
+// if (Object.keys(gg).length>0) {
+//   homeData.value = gg;
+// // setTimeout(val=>{
+// //   console.log(homeData.value);
+//   // debugger
+//     mapInt();
+
+// // },5000)
+// } else {
+// console.log(
+//   32
+// );
+getHomeDatas().then(async (da) => {
   data = da.data.data;
-  let rightDatas = [
-    // {
-    //   proName: "福建省",
-    //   cityData: [
-    //     {
-    //       cityName: "莆田市",
-    //       countryDatas: [
-    //         {
-    //           mdmc: "mdmc",
-    //           sskhmc: "sskhmc",
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
-  ];
+  let rightDatas = [];
+  let datas = JSON.parse(window.localStorage.getItem("mapDatas"));
+  console.log(datas);
+  // if (datas && datas.length >= 0) {
+  //   homeData.value = rightDatas;
+  //   mapInt();
+  //   return;
+  // }
 
   data.forEach((val) => {
+    let gg = sa.find((vals) => {
+      return vals.id == val.id;
+    });
+    // console.log(gg);
+    val.lng = gg.lng;
+    val.lat = gg.lat;
+    // console.log(val);
     if (val.jmpro.length == 2 && val.jmpro != "缅甸") {
       val.jmpro = val.jmpro + "省";
       // if(val.jmpro)
@@ -3176,8 +3232,7 @@ getHomeDatas().then((da) => {
           lng: val.lng,
           lat: val.lat,
           id: val.id,
-                iszg:val.iszg
-
+          iszg: val.iszg,
         });
       } else {
         rightDatas[isHave].cityData.push({
@@ -3189,8 +3244,7 @@ getHomeDatas().then((da) => {
               lng: val.lng,
               lat: val.lat,
               id: val.id,
-                iszg:val.iszg
-
+              iszg: val.iszg,
             },
           ],
         });
@@ -3208,14 +3262,15 @@ getHomeDatas().then((da) => {
                 lng: val.lng,
                 lat: val.lat,
                 id: val.id,
-                iszg:val.iszg
+                iszg: val.iszg,
               },
             ],
           },
         ],
       });
     }
-    let { lng, lat, mdmc, sskhmc, id,iszg } = val;
+
+    let { lng, lat, mdmc, sskhmc, id, iszg } = val;
     if (proobj[val.jmpro]) {
       proobj[val.jmpro].push({
         lng,
@@ -3233,15 +3288,20 @@ getHomeDatas().then((da) => {
           mdmc,
           sskhmc,
           id,
-        iszg,
+          iszg,
         },
       ];
     }
   });
   // console.log(rightDatas);
+  // console.log(
+  //   222222222
+  // );
+  window.localStorage.setItem("mapDatas", JSON.stringify(rightDatas));
   homeData.value = rightDatas;
   mapInt();
 });
+// }
 
 const cityClickExpand = (val) => {
   expandContent(val);
