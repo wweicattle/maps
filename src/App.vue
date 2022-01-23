@@ -33,6 +33,7 @@ let pictures = (id) => {
 
 // 点击出现小窗口函数
 let showShopPage = async (points, val) => {
+  console.log(val);
   let totalData = await Promise.all([
     requestShopDatas(val.id),
     pictures(val.id),
@@ -68,6 +69,9 @@ let showShopPage = async (points, val) => {
     ywyf,
     yjzmj,
     ynzje,
+    nzje,
+    sckd,
+    jzmj,
     yjmpro = "",
     yjmcity = "",
     yjmarea = "",
@@ -75,6 +79,7 @@ let showShopPage = async (points, val) => {
     jmstreet = "",
     jmno = "",
     jmmarket = "",
+    wyf,
   } = totalData[0].data.data;
   let hgbbs = hbbbselects.find((val) => val.dm == hgbb)?.mc || "无";
   let jyfss = qdfbselects.find((val) => val.dm == jyfs)?.mc || "无";
@@ -83,7 +88,7 @@ let showShopPage = async (points, val) => {
   let map = maps();
   let imgs =
     totalData[1].data.data.length == 0
-      ? [{ fileName: "./src/assets/img/noimg.png" }]
+      ? [{ fileName: "static/img/noimg.png" }]
       : totalData[1].data.data;
   let imgS = imgs.reduce((acc, val) => {
     let imgstr = `<div class="swiper-slide"><img src=${val.fileName} alt=""></div>`;
@@ -95,10 +100,22 @@ let showShopPage = async (points, val) => {
     yjmpro + yjmcity + yjmarea + jmtown + jmstreet + jmno + jmmarket;
   let number = zmdphone;
   // let qufs = "主品牌";
-  let area = yjzmj;
-  let nzj = ynzje;
-  let kd = ysckd;
-  let nwyf = ywyf;
+  let area;
+  let nzj;
+  let kd;
+  let nwyf;
+  if (val.iszg == 0) {
+    area = jzmj;
+    nzj = nzje;
+    kd = sckd;
+    nwyf = wyf;
+  } else {
+    area = yjzmj;
+    nzj = ynzje;
+    kd = ysckd;
+    nwyf = ywyf;
+  }
+
   let str = `  <div class="shop-contains">
         <div class="img-items">
             <div class="imgs">
@@ -130,9 +147,9 @@ let showShopPage = async (points, val) => {
             <div class="tit">${mdmc}</div>
             <div class="com-name">贸易公司：${sskhmc}</div>
             <div class="address">
-                <img src="./src/assets/img/address.png" alt="" /><span>${address}</span></div>
+                <img src="static/img/address.png" alt="" /><span>${address}</span></div>
             <div class="pho-num">
-                <img src="./src/assets/img/number.png" alt="" /><span>${number}</span></div>
+                <img src="static/img/number.png" alt="" /><span>${number}</span></div>
             <div class="line"></div>
             <div class="datas">
                 <div class="t-name">
@@ -3078,7 +3095,6 @@ const mapInt = () => {
             dootMarkers.addEventListener(
               "click",
               debounce(function (e) {
-                console.log(4444444444);
                 // 出现小窗口
                 showShopPage(points, val);
                 map.centerAndZoom(points, 15);
@@ -3111,7 +3127,7 @@ const mapInt = () => {
   //   }
   // };
   map.addEventListener("zoomend", function () {
-     if (this.getZoom() <= 5) {
+    if (this.getZoom() <= 5) {
       map.clearOverlays();
       // window.sa();
       // copyData();
@@ -3160,6 +3176,8 @@ getHomeDatas().then((da) => {
           lng: val.lng,
           lat: val.lat,
           id: val.id,
+                iszg:val.iszg
+
         });
       } else {
         rightDatas[isHave].cityData.push({
@@ -3171,6 +3189,8 @@ getHomeDatas().then((da) => {
               lng: val.lng,
               lat: val.lat,
               id: val.id,
+                iszg:val.iszg
+
             },
           ],
         });
@@ -3188,13 +3208,14 @@ getHomeDatas().then((da) => {
                 lng: val.lng,
                 lat: val.lat,
                 id: val.id,
+                iszg:val.iszg
               },
             ],
           },
         ],
       });
     }
-    let { lng, lat, mdmc, sskhmc, id } = val;
+    let { lng, lat, mdmc, sskhmc, id,iszg } = val;
     if (proobj[val.jmpro]) {
       proobj[val.jmpro].push({
         lng,
@@ -3202,6 +3223,7 @@ getHomeDatas().then((da) => {
         mdmc,
         sskhmc,
         id,
+        iszg,
       });
     } else {
       proobj[val.jmpro] = [
@@ -3211,6 +3233,7 @@ getHomeDatas().then((da) => {
           mdmc,
           sskhmc,
           id,
+        iszg,
         },
       ];
     }
@@ -3371,6 +3394,7 @@ onMounted(async (val) => {
       padding-bottom: 6px;
       color: #545454;
       font-size: 13px;
+      line-height: 14px;
       img {
         height: 14px;
         margin-right: 2px;

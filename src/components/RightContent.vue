@@ -395,7 +395,7 @@ const changeRight = (newVal) => {
   rihgtData.value = findData;
 };
 const cityClickBtn = (val) => {
-  emit("cityClickExpand", { lng: val.lng, lat: val.lat,mdmc:val.mdmc,sskhmc:val.sskhmc,id:val.id });
+  emit("cityClickExpand", { lng: val.lng, lat: val.lat,mdmc:val.mdmc,sskhmc:val.sskhmc,id:val.id ,iszg:val.iszg});
 };
 const findShops = () => {
       watchFn(inputVal.value);
