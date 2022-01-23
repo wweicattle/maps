@@ -1,9 +1,10 @@
 <script setup>
 import { getShopDatas, getPicture, getHomeDatas } from "./network/home.js";
-
 import { onMounted, ref, reactive, nextTick } from "vue";
 import mapImg from "@/assets/map1.png";
 import RightContent from "@/components/RightContent.vue";
+import { debounce } from "@/utils/debounce.js";
+
 let markerClusterer = ref(null);
 let infoObj = reactive({ data: [] });
 let homeData = ref(null);
@@ -14,10 +15,13 @@ let maps;
 var infoBox;
 var dom;
 let imgFa;
+
 let requestShopDatas = (id) => {
   // 请求门店详情信息 包括图片 版本等
   return getShopDatas(id).then((da) => {
     return da;
+    // if (da.data.errcode == 0) return da;
+    // return
   });
 };
 let pictures = (id) => {
@@ -67,7 +71,7 @@ let showShopPage = async (points, val) => {
     yjmpro = "",
     yjmcity = "",
     yjmarea = "",
-    jmtown="",
+    jmtown = "",
     jmstreet = "",
     jmno = "",
     jmmarket = "",
@@ -98,7 +102,7 @@ let showShopPage = async (points, val) => {
   let str = `  <div class="shop-contains">
         <div class="img-items">
             <div class="imgs">
-                <div class="close-icon" @click="clickclose">X</div>
+                <div class="close-icon" >x</div>
                 <div class="swiper">
                     <div class="swiper-wrapper">
                         ${imgS}
@@ -109,7 +113,17 @@ let showShopPage = async (points, val) => {
                 </div>
 
                 <div class="icons">
-                    ${yjmcity?yjmcity.substr(0, 2):yjmarea?yjmarea.substr(0, 2):jmtown?jmtown.substr(0, 2):jmstreet?jmstreet.substr(0, 2):"无"}</div>
+                    ${
+                      yjmcity
+                        ? yjmcity.substr(0, 2)
+                        : yjmarea
+                        ? yjmarea.substr(0, 2)
+                        : jmtown
+                        ? jmtown.substr(0, 2)
+                        : jmstreet
+                        ? jmstreet.substr(0, 2)
+                        : "无"
+                    }</div>
             </div>
         </div>
         <div class="des-content">
@@ -127,7 +141,7 @@ let showShopPage = async (points, val) => {
                 </div>
                 <div class="des-items">
                     货柜版本:${hgbbs}; 渠道分布:${jyfss}; 面积:${area}平; 
-                    年租金:${nzj};商场扣点:${kd}%;物业费:${nwyf}元;
+                    年租金:${nzj}万元;商场扣点:${kd}%;年物业费:${nwyf}万元;
                 </div>
 
             </div>
@@ -176,14 +190,18 @@ let showShopPage = async (points, val) => {
 const expandContent = (val) => {
   // 点击右边数据门店进入
   if (val && Object.keys(val).length > 0) {
-    // 清除已有得窗口
-    // if (infoBox) infoBox.close();
-    // if (dom) dom.onclick = null;
     let map = maps();
     var point = new BMap.Point(val.lng, val.lat);
+    // 具体小窗口函数
     showShopPage(point, val);
     // 门店标注
     var marker = new BMap.Marker(point); // 创建标注
+    marker.addEventListener(
+      "click",
+      debounce(() => {
+        showShopPage(point, val);
+      }, 300)
+    );
     map.addOverlay(marker);
     map.centerAndZoom(point, 15);
     return;
@@ -485,6 +503,7 @@ function randomColor() {
   if (num == 2) num = 0;
   return arr[num++];
 }
+
 let data;
 // let data = [
 //   // {
@@ -3056,12 +3075,16 @@ const mapInt = () => {
             let dootMarkers = new BMap.Marker(points);
             map.addOverlay(dootMarkers);
             // arrss.push(dootMarkers);
-            dootMarkers.addEventListener("click", function (e) {
-              // 出现小窗口
-              console.log(points,val);
-              showShopPage(points, val);
-              map.centerAndZoom(points, 15);
-            });
+            dootMarkers.addEventListener(
+              "click",
+              debounce(function (e) {
+                console.log(4444444444);
+                // 出现小窗口
+                showShopPage(points, val);
+                map.centerAndZoom(points, 15);
+              }),
+              500
+            );
           });
         }
       );
@@ -3070,34 +3093,31 @@ const mapInt = () => {
     }
     // 把每个省份的标注的属性方法保存起来 。后面点击列表模仿点击
     val.markerMethod = markerMethod;
-    let num = 0;
-    if (num == 0) {
-      console.log(21);
-      marker.addEventListener(
-        "click",
-        (e) => {
-          markerMethod();
-          // e.stopPropagation();
-          return false;
-        },
-        false
-      );
-    }
+
+    marker.addEventListener("click", debounce(markerMethod, 500));
     marker.disableMassClear();
     label.disableMassClear();
     map.addOverlay(marker);
   });
-  window.onwheel = function () {
-    let a = map.getZoom();
-    console.log(a);
-    // var allOverlay = map.getOverlays();
-    // 7的话删除所有~
-    if (a <= 6) {
+  // window.onwheel = function () {
+  //   let a = map.getZoom();
+  //   console.log(a);
+  //   // var allOverlay = map.getOverlays();
+  //   // 7的话删除所有~
+  //   if (a <= 6) {
+  //     map.clearOverlays();
+  //     // window.sa();
+  //     // copyData();
+  //   }
+  // };
+  map.addEventListener("zoomend", function () {
+     if (this.getZoom() <= 5) {
       map.clearOverlays();
       // window.sa();
       // copyData();
     }
-  };
+    // alert("地图缩放至：" + this.getZoom() + "级");
+  });
   maps = () => {
     return map;
   };
@@ -3174,14 +3194,14 @@ getHomeDatas().then((da) => {
         ],
       });
     }
-    let { lng, lat, mdmc, sskhmc,id } = val;
+    let { lng, lat, mdmc, sskhmc, id } = val;
     if (proobj[val.jmpro]) {
       proobj[val.jmpro].push({
         lng,
         lat,
         mdmc,
         sskhmc,
-        id
+        id,
       });
     } else {
       proobj[val.jmpro] = [
@@ -3190,7 +3210,7 @@ getHomeDatas().then((da) => {
           lat,
           mdmc,
           sskhmc,
-          id
+          id,
         },
       ];
     }
@@ -3227,8 +3247,17 @@ onMounted(async (val) => {
 <style lang="less">
 .swiper {
   --swiper-theme-color: #ff6600; /* 设置Swiper风格 */
-  --swiper-navigation-color: #000; /* 单独设置按钮颜色 */
-  --swiper-navigation-size: 18px; /* 设置按钮大小 */
+  --swiper-navigation-color: #fff; /* 单独设置按钮颜色 */
+  --swiper-navigation-size: 12px; /* 设置按钮大小 */
+}
+.swiper-button-prev,
+.swiper-button-next {
+  width: 24px;
+  height: 24px;
+  background: #333333;
+  opacity: 0.5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
 }
 .swiper {
   width: 300px;
@@ -3272,9 +3301,9 @@ onMounted(async (val) => {
         border-radius: 50%;
         text-align: center;
         line-height: 24px;
-        color: #cfcece;
+        color: #fff;
         background: #333333;
-        opacity: 0.5;
+        opacity: 0.7;
         border: 1px solid rgba(255, 255, 255, 0.2);
         z-index: 1000;
         &:hover {
@@ -3355,12 +3384,13 @@ onMounted(async (val) => {
       height: 6px;
     }
     .datas {
-      // height: 100px;
+      height: 116px;
+      overflow: hidden;
       // border: 1px solid red;
       .t-name {
         display: flex;
         margin-top: 14px;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
         align-items: center;
         height: 20px;
         .icons {
@@ -3378,7 +3408,7 @@ onMounted(async (val) => {
         font-size: 14px;
         color: #888888;
         letter-spacing: 2px;
-        line-height: 19px;
+        line-height: 17px;
       }
     }
   }

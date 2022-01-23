@@ -200,7 +200,7 @@ var INFOBOX_AT_TOP = 1,
         this._opts.boxClass = d.boxClass || "infoBox";
         this._opts.boxStyle = d.boxStyle || {};
         this._opts.closeIconMargin = d.closeIconMargin || "2px";
-        this._opts.closeIconUrl = d.closeIconUrl || "close.png";
+        this._opts.closeIconUrl = d.closeIconUrl;
         this._opts.enableAutoPan = d.enableAutoPan ? true : false;
         this._opts.align = d.align || INFOBOX_AT_TOP
     };
